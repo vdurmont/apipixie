@@ -1,4 +1,4 @@
-package com.ligati.apipixie.tools.model;
+package com.ligati.apipixie.model;
 
 import com.ligati.apipixie.annotation.APIEntity;
 

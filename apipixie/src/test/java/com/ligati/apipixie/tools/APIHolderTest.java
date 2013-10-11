@@ -12,11 +12,11 @@ import org.junit.runners.JUnit4;
 
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
-import com.ligati.apipixie.tools.model.Entity;
-import com.ligati.apipixie.tools.model.EntityWithoutAnnotation;
-import com.ligati.apipixie.tools.model.EntityWithoutDefaultConstructor;
-import com.ligati.apipixie.tools.model.EntityWithoutGetter;
-import com.ligati.apipixie.tools.model.EntityWithoutSetter;
+import com.ligati.apipixie.model.Entity;
+import com.ligati.apipixie.model.EntityWithoutAnnotation;
+import com.ligati.apipixie.model.EntityWithoutDefaultConstructor;
+import com.ligati.apipixie.model.EntityWithoutGetter;
+import com.ligati.apipixie.model.EntityWithoutSetter;
 
 @RunWith(JUnit4.class)
 public class APIHolderTest {
