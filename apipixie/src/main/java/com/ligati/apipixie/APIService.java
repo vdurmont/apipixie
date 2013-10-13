@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ligati.apipixie.exception.APIParsingException;
+import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.tools.APIHolder;
 
 public class APIService<T> {
