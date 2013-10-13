@@ -6,6 +6,10 @@ import com.ligati.apipixie.http.DefaultAPIHttpManager;
 public class APIPixie {
 	private String apiUrl;
 
+	public APIPixie(String apiUrl) {
+		this.setAPIUrl(apiUrl);
+	}
+
 	public <T> APIService<T> getService(Class<T> clazz) {
 		return new APIService<>(this, clazz, new DefaultAPIHttpManager());
 	}

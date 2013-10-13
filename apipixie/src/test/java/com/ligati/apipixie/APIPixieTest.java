@@ -20,7 +20,7 @@ public class APIPixieTest {
 	@Test
 	public void getService_returns_the_associated_service() {
 		// GIVEN
-		APIPixie pixie = new APIPixie();
+		APIPixie pixie = new APIPixie("http://myapi.com");
 
 		// WHEN
 		APIService<Entity> service = pixie.getService(Entity.class);
@@ -30,21 +30,9 @@ public class APIPixieTest {
 	}
 
 	@Test
-	public void getAPIUrl_if_null_apiUrl_fails() {
-		// GIVEN
-		APIPixie pixie = new APIPixie();
-
-		// THEN
-		this.expectedEx.expect(APIConfigurationException.class);
-
-		// WHEN
-		pixie.getAPIUrl();
-	}
-
-	@Test
 	public void setAPIUrl_if_null_apiUrl_fails() {
 		// GIVEN
-		APIPixie pixie = new APIPixie();
+		APIPixie pixie = new APIPixie("http://myapi.com");
 
 		// THEN
 		this.expectedEx.expect(APIConfigurationException.class);
@@ -56,7 +44,7 @@ public class APIPixieTest {
 	@Test
 	public void setAPIUrl_if_empty_apiUrl_fails() {
 		// GIVEN
-		APIPixie pixie = new APIPixie();
+		APIPixie pixie = new APIPixie("http://myapi.com");
 
 		// THEN
 		this.expectedEx.expect(APIConfigurationException.class);
@@ -68,7 +56,7 @@ public class APIPixieTest {
 	@Test
 	public void setAPIUrl_defines_the_apiUrl() {
 		// GIVEN
-		APIPixie pixie = new APIPixie();
+		APIPixie pixie = new APIPixie("http://myapi.com");
 		String url = "http://myawesomeurl.com";
 
 		// WHEN

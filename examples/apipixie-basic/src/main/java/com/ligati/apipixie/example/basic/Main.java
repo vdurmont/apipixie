@@ -8,8 +8,7 @@ import com.ligati.apipixie.APIService;
 public class Main {
 	public static void main(String[] args) {
 		// Creating the pixie instance and getting the service
-		APIPixie pixie = new APIPixie();
-		pixie.setAPIUrl("http://localhost:1337");
+		APIPixie pixie = new APIPixie("http://localhost:1337");
 		APIService<Message> service = pixie.getService(Message.class);
 
 		// GetALL
