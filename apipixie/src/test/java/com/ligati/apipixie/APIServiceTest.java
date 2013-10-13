@@ -3,6 +3,7 @@ package com.ligati.apipixie;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -19,9 +20,12 @@ import org.junit.runners.JUnit4;
 
 import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.model.Entity;
+import com.ligati.apipixie.model.EntityWithUrl;
+import com.ligati.apipixie.tools.AnnotationUtil;
 
 @RunWith(JUnit4.class)
 public class APIServiceTest {
+	private APIPixie pixie;
 	private APIHttpManager http;
 
 	private static Long IDS = 1L;
@@ -31,6 +35,7 @@ public class APIServiceTest {
 
 	@Before
 	public void setUp() {
+		this.pixie = mock(APIPixie.class);
 		this.http = mock(APIHttpManager.class);
 	}
 
@@ -47,7 +52,7 @@ public class APIServiceTest {
 		array.put(entity2);
 
 		when(this.http.getArray(anyString())).thenReturn(array);
-		APIService<Entity> service = new APIService<>(Entity.class, http);
+		APIService<Entity> service = new APIService<>(pixie, Entity.class, http);
 
 		// WHEN
 		List<Entity> entities = service.getAll();
@@ -56,6 +61,42 @@ public class APIServiceTest {
 		assertEquals(2, entities.size());
 		assertEquals(text1, entities.get(0).getText());
 		assertEquals(text2, entities.get(1).getText());
+	}
+
+	@Test
+	public void if_no_specific_config_the_url_is_the_apiURL_plus_the_name_of_the_entity_in_plural_form() {
+		// GIVEN
+		String apiUrl = "http://myapi.com";
+		when(pixie.getAPIUrl()).thenReturn(apiUrl);
+		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
+
+		APIService<Entity> service = new APIService<>(pixie, Entity.class, http);
+
+		// WHEN
+		service.getAll();
+
+		// THEN
+		String url = apiUrl + "/entities";
+		verify(this.http).getArray(url);
+	}
+
+	@Test
+	public void if_specified_url_the_requestUrl_should_be_the_apiURL_plus_the_custom_url() {
+		// GIVEN
+		String apiUrl = "http://myapi.com";
+		when(pixie.getAPIUrl()).thenReturn(apiUrl);
+		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
+
+		APIService<EntityWithUrl> service = new APIService<>(pixie,
+				EntityWithUrl.class, http);
+
+		// WHEN
+		service.getAll();
+
+		// THEN
+		String url = apiUrl + "/"
+				+ AnnotationUtil.getEntityUrl(EntityWithUrl.class);
+		verify(this.http).getArray(url);
 	}
 
 	private static JSONObject generateEntityJSON(String text)
