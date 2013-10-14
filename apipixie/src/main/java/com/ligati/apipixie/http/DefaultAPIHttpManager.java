@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.ligati.apipixie.exception.APIHTTPException;
 
@@ -17,6 +18,11 @@ public class DefaultAPIHttpManager implements APIHttpManager {
 	@Override
 	public JSONArray getArray(String url) {
 		return performGet(JSONArray.class, url);
+	}
+
+	@Override
+	public JSONObject getObject(String url) {
+		return performGet(JSONObject.class, url);
 	}
 
 	private static <T> T performGet(Class<T> clazz, String url) {

@@ -81,7 +81,13 @@ public class APIHolder<T> {
 			throw new APIParsingException("Unknown property: " + name);
 		else
 			try {
-				setter.invoke(entity, value);
+				if (value instanceof Integer) {
+					// Fix for long values
+					Method getter = this.getters.get(name);
+					if (Long.class.equals(getter.getReturnType()))
+						setter.invoke(entity, Long.valueOf((int) value));
+				} else
+					setter.invoke(entity, value);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				throw new APIParsingException("Unknown property: " + name, e);

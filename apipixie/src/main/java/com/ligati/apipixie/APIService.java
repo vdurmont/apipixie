@@ -14,7 +14,7 @@ import com.ligati.apipixie.tools.APIHolder;
 import com.ligati.apipixie.tools.AnnotationUtil;
 import com.ligati.apipixie.tools.UrlUtil;
 
-public class APIService<T> {
+public class APIService<T, K> {
 	private static final Logger logger = Logger.getLogger(APIService.class);
 
 	private final APIPixie pixie;
@@ -42,6 +42,12 @@ public class APIService<T> {
 		logger.debug("Getting all the " + entityName);
 		JSONArray array = this.http.getArray(this.buildUrl(""));
 		return this.jsonArrayToEntity(array);
+	}
+
+	public T get(K id) {
+		logger.debug("Getting the " + entityName + "#" + id);
+		JSONObject json = this.http.getObject(this.buildUrl(id.toString()));
+		return this.jsonObjectToEntity(json);
 	}
 
 	private String buildUrl(String path) {

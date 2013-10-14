@@ -23,7 +23,7 @@ public class APIPixieTest {
 		APIPixie pixie = new APIPixie("http://myapi.com");
 
 		// WHEN
-		APIService<Entity> service = pixie.getService(Entity.class);
+		APIService<Entity, Long> service = pixie.getService(Entity.class);
 
 		// THEN
 		assertNotNull(service);

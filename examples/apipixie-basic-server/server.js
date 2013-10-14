@@ -13,9 +13,11 @@ app.configure(function(){
 
 var messages = [
 	{
+		id: 1,
 		text: "My awesome message 1"
 	},
 	{
+		id: 2,
 		text: "My awesome message 2"
 	}
 ];
@@ -23,6 +25,12 @@ var messages = [
 app.get('/messages', function(req, res) {
 	console.log("Received a request to send all the messages.");
 	res.send(200, messages);
+});
+
+app.get('/messages/:id', function(req, res) {
+	var id = req.params.id;
+	console.log("Received a request to get the message#"+id+".");
+	res.send(200, messages[id-1]);
 });
 
 http.createServer(app).listen(app.get('port'), function(){

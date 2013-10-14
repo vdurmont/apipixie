@@ -10,7 +10,7 @@ public class APIPixie {
 		this.setAPIUrl(apiUrl);
 	}
 
-	public <T> APIService<T> getService(Class<T> clazz) {
+	public <T, K> APIService<T, K> getService(Class<T> clazz) {
 		return new APIService<>(this, clazz, new DefaultAPIHttpManager());
 	}
 

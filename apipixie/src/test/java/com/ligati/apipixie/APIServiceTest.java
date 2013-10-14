@@ -52,7 +52,8 @@ public class APIServiceTest {
 		array.put(entity2);
 
 		when(this.http.getArray(anyString())).thenReturn(array);
-		APIService<Entity> service = new APIService<>(pixie, Entity.class, http);
+		APIService<Entity, Long> service = new APIService<>(pixie,
+				Entity.class, http);
 
 		// WHEN
 		List<Entity> entities = service.getAll();
@@ -70,7 +71,8 @@ public class APIServiceTest {
 		when(pixie.getAPIUrl()).thenReturn(apiUrl);
 		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
 
-		APIService<Entity> service = new APIService<>(pixie, Entity.class, http);
+		APIService<Entity, Long> service = new APIService<>(pixie,
+				Entity.class, http);
 
 		// WHEN
 		service.getAll();
@@ -81,13 +83,13 @@ public class APIServiceTest {
 	}
 
 	@Test
-	public void if_specified_url_the_requestUrl_should_be_the_apiURL_plus_the_custom_url() {
+	public void if_the_annotation_specifies_an_url_the_requestUrl_should_be_the_apiURL_plus_the_custom_url() {
 		// GIVEN
 		String apiUrl = "http://myapi.com";
 		when(pixie.getAPIUrl()).thenReturn(apiUrl);
 		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
 
-		APIService<EntityWithUrl> service = new APIService<>(pixie,
+		APIService<EntityWithUrl, Long> service = new APIService<>(pixie,
 				EntityWithUrl.class, http);
 
 		// WHEN
@@ -97,6 +99,25 @@ public class APIServiceTest {
 		String url = apiUrl + "/"
 				+ AnnotationUtil.getEntityUrl(EntityWithUrl.class);
 		verify(this.http).getArray(url);
+	}
+
+	@Test
+	public void get_returns_the_entity() throws JSONException {
+		// GIVEN
+		String text = "my text";
+		JSONObject json = generateEntityJSON(text);
+		Long id = json.getLong("id");
+
+		when(this.http.getObject(anyString())).thenReturn(json);
+		APIService<Entity, Long> service = new APIService<>(pixie,
+				Entity.class, http);
+
+		// WHEN
+		Entity entity = service.get(id);
+
+		// THEN
+		assertEquals(id, entity.getId());
+		assertEquals(text, entity.getText());
 	}
 
 	private static JSONObject generateEntityJSON(String text)

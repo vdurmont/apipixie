@@ -9,10 +9,14 @@ public class Main {
 	public static void main(String[] args) {
 		// Creating the pixie instance and getting the service
 		APIPixie pixie = new APIPixie("http://localhost:1337");
-		APIService<Message> service = pixie.getService(Message.class);
+		APIService<Message, Long> service = pixie.getService(Message.class);
 
 		// GetALL
 		List<Message> messages = service.getAll();
 		System.out.println("All messages: " + messages);
+
+		// Get #1
+		Message message = service.get(1L);
+		System.out.println("Message#1: " + message);
 	}
 }
