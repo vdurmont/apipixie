@@ -35,7 +35,7 @@ app.put('/messages/:id', function(req, res) {
 	console.log("Received a request to update the message#"+id);
 
 	// In case of a modification of the id by the user...
-	input.id = id;
+	input.id = parseInt(id);
 
 	messages[id-1] = input;
 
