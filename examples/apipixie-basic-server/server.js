@@ -1,15 +1,6 @@
-var express = require('express'),
-	http = require('http');
-
+var express = require('express');
 var app = express();
-
-app.configure(function(){
-	app.set('port', process.env.PORT || 1337);
-	app.use(express.favicon());
-	app.use(express.bodyParser());
-	app.use(express.methodOverride());
-	app.use(app.router);
-});
+app.use(express.bodyParser());
 
 var messages = [
 	{
@@ -23,17 +14,42 @@ var messages = [
 ];
 
 app.get('/messages', function(req, res) {
-	console.log("Received a request to send all the messages.");
-	res.send(200, messages);
+	console.log("Received a request to get all the messages.");
+	res.json(messages);
+	end();
 });
 
 app.get('/messages/:id', function(req, res) {
 	var id = req.params.id;
 	console.log("Received a request to get the message#"+id+".");
-	res.send(200, messages[id-1]);
+	res.json(messages[id-1]);
+	end();
 });
 
-http.createServer(app).listen(app.get('port'), function(){
-	console.log("Express server listening on port " + app.get('port'));
+app.put('/messages/:id', function(req, res) {
+	var id = req.params.id;
+	var input = req.body;
+
+	console.dir(input)
+
+	console.log("Received a request to update the message#"+id);
+
+	// In case of a modification of the id by the user...
+	input.id = id;
+
+	messages[id-1] = input;
+
+	console.log("return:");
+	console.dir(messages[id-1]);
+	res.json(messages[id-1]);
+	end();
 });
+
+var end = function(){
+	console.log("MESSAGES:");
+	console.dir(messages);
+}
+
+app.listen(1337);
+console.log("Express server listening on port 1337");
 

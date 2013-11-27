@@ -18,5 +18,10 @@ public class Main {
 		// Get #1
 		Message message = service.get(1L);
 		System.out.println("Message#1: " + message);
+
+		// Put #1
+		message.setText("new text");
+		message = service.put(message);
+		System.out.println("Message#1: " + message);
 	}
 }
