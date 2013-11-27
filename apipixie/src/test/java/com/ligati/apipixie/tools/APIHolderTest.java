@@ -1,9 +1,6 @@
 package com.ligati.apipixie.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import com.ligati.apipixie.model.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -12,11 +9,8 @@ import org.junit.runners.JUnit4;
 
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
-import com.ligati.apipixie.model.Entity;
-import com.ligati.apipixie.model.EntityWithoutAnnotation;
-import com.ligati.apipixie.model.EntityWithoutDefaultConstructor;
-import com.ligati.apipixie.model.EntityWithoutGetter;
-import com.ligati.apipixie.model.EntityWithoutSetter;
+
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class APIHolderTest {
@@ -28,7 +22,7 @@ public class APIHolderTest {
 		// GIVEN
 
 		// WHEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity instance = holder.create();
 
 		// THEN
@@ -84,9 +78,45 @@ public class APIHolderTest {
 	}
 
 	@Test
+	public void construct_without_property_id_nor_APIId_annotation_fails() {
+		// GIVEN
+		Class<?> clazz = EntityWithoutIdPropertyNorAPIIdAnnotation.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz);
+	}
+
+	@Test
+	public void construct_with_several_APIId_annotation_fails() {
+		// GIVEN
+		Class<?> clazz = EntityWithSeveralAPIIdAnnotations.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz);
+	}
+
+	@Test
+	public void construct_without_id_property_and_with_an_APIId_annotation_is_ok() {
+		// GIVEN
+		Class<?> clazz = EntityWithoutIdPropertyButAnAPIIdAnnotation.class;
+
+		// WHEN
+		new APIHolder<>(clazz);
+
+		// THEN
+		// It's ok
+	}
+
+	@Test
 	public void set_with_null_entity_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 
 		// THEN
 		this.expectedEx.expect(APIParsingException.class);
@@ -98,7 +128,7 @@ public class APIHolderTest {
 	@Test
 	public void set_with_null_name_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 
 		// THEN
@@ -111,7 +141,7 @@ public class APIHolderTest {
 	@Test
 	public void set_with_empty_name_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 
 		// THEN
@@ -124,7 +154,7 @@ public class APIHolderTest {
 	@Test
 	public void set_sets_the_value() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 		String text = "my text";
 
@@ -138,7 +168,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_null_entity_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 
 		// THEN
 		this.expectedEx.expect(APIParsingException.class);
@@ -150,7 +180,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_null_name_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 
 		// THEN
@@ -163,7 +193,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_empty_name_fails() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 
 		// THEN
@@ -176,7 +206,7 @@ public class APIHolderTest {
 	@Test
 	public void get_a_null_field_returns_null() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 
 		// WHEN
@@ -189,7 +219,7 @@ public class APIHolderTest {
 	@Test
 	public void get_a_field_returns_its_value() {
 		// GIVEN
-		APIHolder<Entity> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
 		Entity entity = new Entity();
 		String text = "my text";
 		entity.setText(text);

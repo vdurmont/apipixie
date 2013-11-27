@@ -6,13 +6,15 @@ public class APIHTTPException extends APIPixieException {
 	private Integer statusCode;
 	private String reasonPhrase;
 	private String content;
+	private String url;
 
-	public APIHTTPException(int statusCode, String reasonPhrase, String content) {
+	public APIHTTPException(int statusCode, String reasonPhrase, String content, String url) {
 		super("A " + statusCode
-				+ " status code was returned when performing the request.");
+				+ " status code was returned when performing a request on '"+url+"'");
 		this.statusCode = statusCode;
 		this.reasonPhrase = reasonPhrase;
 		this.content = content;
+		this.url = url;
 	}
 
 	public APIHTTPException(String msg, Exception e) {
@@ -29,5 +31,9 @@ public class APIHTTPException extends APIPixieException {
 
 	public String getContent() {
 		return content;
+	}
+
+	public String getUrl() {
+		return url;
 	}
 }

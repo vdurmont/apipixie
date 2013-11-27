@@ -3,6 +3,9 @@ package com.ligati.apipixie.tools;
 import com.ligati.apipixie.annotation.APIEntity;
 import com.ligati.apipixie.exception.APIConfigurationException;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+
 public class AnnotationUtil {
 	protected static APIEntity getEntityAnnotation(Class<?> clazz) {
 		APIEntity annotation = clazz.getAnnotation(APIEntity.class);
@@ -20,5 +23,13 @@ public class AnnotationUtil {
 			String url = annotation.url();
 			return url.isEmpty() ? null : url;
 		}
+	}
+
+	public static boolean hasAnnotation(Field field, Class<?> annotationClazz) {
+		Annotation[] annotations = field.getDeclaredAnnotations();
+		for (Annotation annotation : annotations)
+			if (annotationClazz.equals(annotation.annotationType()))
+				return true;
+		return false;
 	}
 }

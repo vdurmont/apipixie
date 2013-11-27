@@ -1,18 +1,17 @@
 package com.ligati.apipixie;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.ligati.apipixie.exception.APIParsingException;
 import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.tools.APIHolder;
 import com.ligati.apipixie.tools.AnnotationUtil;
 import com.ligati.apipixie.tools.UrlUtil;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class APIService<T, K> {
 	private static final Logger logger = Logger.getLogger(APIService.class);
@@ -20,12 +19,12 @@ public class APIService<T, K> {
 	private final APIPixie pixie;
 	private final String entityName;
 	private final String entityUrl;
-	private final APIHolder<T> holder;
+	private final APIHolder<T, K> holder;
 	private final APIHttpManager http;
 
 	public APIService(APIPixie pixie, Class<T> clazz, APIHttpManager http) {
 		this.pixie = pixie;
-		this.holder = new APIHolder<T>(clazz);
+		this.holder = new APIHolder<>(clazz);
 		this.http = http;
 		this.entityName = clazz.getSimpleName();
 		this.entityUrl = this.getEntityUrl(clazz);
@@ -41,12 +40,20 @@ public class APIService<T, K> {
 	public List<T> getAll() {
 		logger.debug("Getting all the " + entityName);
 		JSONArray array = this.http.getArray(this.buildUrl(""));
-		return this.jsonArrayToEntity(array);
+		return this.jsonArrayToEntities(array);
 	}
 
 	public T get(K id) {
 		logger.debug("Getting the " + entityName + "#" + id);
 		JSONObject json = this.http.getObject(this.buildUrl(id.toString()));
+		return this.jsonObjectToEntity(json);
+	}
+
+	public T put(T entity) {
+		logger.debug("Putting a " + entityName);
+		K id = this.holder.getId(entity);
+		JSONObject json = entityToJsonObject(entity);
+		json = this.http.putObject(this.buildUrl(id.toString()), json);
 		return this.jsonObjectToEntity(json);
 	}
 
@@ -62,7 +69,7 @@ public class APIService<T, K> {
 		return sb.toString();
 	}
 
-	private List<T> jsonArrayToEntity(JSONArray array) {
+	private List<T> jsonArrayToEntities(JSONArray array) {
 		List<T> list = new LinkedList<>();
 		for (int i = 0; i < array.length(); i++) {
 			try {
@@ -70,8 +77,7 @@ public class APIService<T, K> {
 				T entity = this.jsonObjectToEntity(json);
 				list.add(entity);
 			} catch (JSONException e) {
-				throw new APIParsingException(
-						"An error occurred while reading the json array", e);
+				throw new APIParsingException("An error occurred while reading the json array", e);
 			}
 		}
 		return list;
@@ -83,11 +89,20 @@ public class APIService<T, K> {
 			try {
 				entity = this.holder.set(entity, name, json.get(name));
 			} catch (JSONException e) {
-				throw new APIParsingException(
-						"An error occurred while reading the json property: "
-								+ name, e);
+				throw new APIParsingException("An error occurred while reading the json property: " + name, e);
 			}
 		}
 		return entity;
+	}
+
+	private JSONObject entityToJsonObject(T entity) {
+		JSONObject json = new JSONObject();
+		for (String property : this.holder.getPropertiesNames())
+			try {
+				json.put(property, this.holder.get(entity, property));
+			} catch (JSONException e) {
+				throw new APIParsingException("An error occurred while reading the entity field: " + property, e);
+			}
+		return json;
 	}
 }

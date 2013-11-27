@@ -1,13 +1,9 @@
 package com.ligati.apipixie;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-
+import com.ligati.apipixie.http.APIHttpManager;
+import com.ligati.apipixie.model.Entity;
+import com.ligati.apipixie.model.EntityWithUrl;
+import com.ligati.apipixie.tools.AnnotationUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,10 +14,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import com.ligati.apipixie.http.APIHttpManager;
-import com.ligati.apipixie.model.Entity;
-import com.ligati.apipixie.model.EntityWithUrl;
-import com.ligati.apipixie.tools.AnnotationUtil;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(JUnit4.class)
 public class APIServiceTest {
@@ -52,8 +49,7 @@ public class APIServiceTest {
 		array.put(entity2);
 
 		when(this.http.getArray(anyString())).thenReturn(array);
-		APIService<Entity, Long> service = new APIService<>(pixie,
-				Entity.class, http);
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
 
 		// WHEN
 		List<Entity> entities = service.getAll();
@@ -71,8 +67,7 @@ public class APIServiceTest {
 		when(pixie.getAPIUrl()).thenReturn(apiUrl);
 		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
 
-		APIService<Entity, Long> service = new APIService<>(pixie,
-				Entity.class, http);
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
 
 		// WHEN
 		service.getAll();
@@ -89,15 +84,13 @@ public class APIServiceTest {
 		when(pixie.getAPIUrl()).thenReturn(apiUrl);
 		when(this.http.getArray(anyString())).thenReturn(new JSONArray());
 
-		APIService<EntityWithUrl, Long> service = new APIService<>(pixie,
-				EntityWithUrl.class, http);
+		APIService<EntityWithUrl, Long> service = new APIService<>(pixie, EntityWithUrl.class, http);
 
 		// WHEN
 		service.getAll();
 
 		// THEN
-		String url = apiUrl + "/"
-				+ AnnotationUtil.getEntityUrl(EntityWithUrl.class);
+		String url = apiUrl + "/" + AnnotationUtil.getEntityUrl(EntityWithUrl.class);
 		verify(this.http).getArray(url);
 	}
 
@@ -109,8 +102,7 @@ public class APIServiceTest {
 		Long id = json.getLong("id");
 
 		when(this.http.getObject(anyString())).thenReturn(json);
-		APIService<Entity, Long> service = new APIService<>(pixie,
-				Entity.class, http);
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
 
 		// WHEN
 		Entity entity = service.get(id);
@@ -120,8 +112,31 @@ public class APIServiceTest {
 		assertEquals(text, entity.getText());
 	}
 
-	private static JSONObject generateEntityJSON(String text)
-			throws JSONException {
+	@Test
+	public void put_updates_and_returns_the_entity() throws JSONException {
+		// GIVEN
+		String text = "my text";
+		JSONObject json = generateEntityJSON(text);
+		Long id = json.getLong("id");
+
+		when(this.http.putObject(anyString(), any(JSONObject.class))).thenReturn(json);
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		Entity modified = new Entity();
+		modified.setId(id);
+		modified.setText(text);
+
+		// WHEN
+		Entity entity = service.put(modified);
+
+		// THEN
+		assertEquals(id, entity.getId());
+		assertEquals(text, entity.getText());
+
+		verify(this.http).putObject(anyString(), any(JSONObject.class));
+	}
+
+	private static JSONObject generateEntityJSON(String text) throws JSONException {
 		JSONObject entity = new JSONObject();
 		entity.put("id", IDS++);
 		entity.put("text", text);
