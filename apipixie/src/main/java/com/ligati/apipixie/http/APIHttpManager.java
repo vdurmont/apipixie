@@ -9,4 +9,8 @@ public interface APIHttpManager {
 	public JSONObject getObject(String url);
 
 	public JSONObject putObject(String url, JSONObject json);
+
+	public JSONObject postObject(String url, JSONObject json);
+
+	public void deleteObject(String url);
 }

@@ -2,26 +2,37 @@ var express = require('express');
 var app = express();
 app.use(express.bodyParser());
 
-var messages = [
-	{
-		id: 1,
-		text: "My awesome message 1"
-	},
-	{
-		id: 2,
-		text: "My awesome message 2"
-	}
-];
+var ids = 0;
+var messages = {};
 
 app.get('/messages', function(req, res) {
 	console.log("Received a request to get all the messages.");
-	res.json(messages);
+
+	// TODO I don't remember how to get the values of an object.
+	// I will look it up when my plane lands and delete this shitty code!
+	var result = [];
+	for (var key in messages) result.push(messages[key]);
+
+	res.json(result);
+});
+
+app.post('/messages', function(req, res) {
+	console.log("Received a request to post a message.");
+	var input = req.body;
+	
+	input.id = ids++;
+	messages[input.id] = input;
+	res.json(201, input);
 });
 
 app.get('/messages/:id', function(req, res) {
 	var id = req.params.id;
 	console.log("Received a request to get the message#"+id+".");
-	res.json(messages[id-1]);
+	var message = messages[id];
+	if (message == null)
+		res.send(404);
+	else
+		res.json(message);
 });
 
 app.put('/messages/:id', function(req, res) {
@@ -30,11 +41,27 @@ app.put('/messages/:id', function(req, res) {
 
 	console.log("Received a request to update the message#"+id);
 
-	// In case of a modification of the id by the user...
-	input.id = parseInt(id);
+	var message = messages[id];
+	if (message == null)
+		res.send(404);
+	else {
+		// In case of a modification of the id by the user...
+		input.id = parseInt(id);
+		messages[id] = input;
+		res.json(input);
+	}
+});
 
-	messages[id-1] = input;
-	res.json(messages[id-1]);
+app.del('/messages/:id', function(req, res) {
+	var id = req.params.id;
+	console.log("Received a request to delete the message#"+id+".");
+	var message = messages[id];
+	if (message == null)
+		res.send(404);
+	else {
+		delete messages[id];
+		res.send(204);
+	}
 });
 
 app.listen(1337);

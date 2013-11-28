@@ -3,6 +3,7 @@ package com.ligati.apipixie.tools;
 import com.ligati.apipixie.annotation.APIId;
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
+import org.apache.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +11,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class APIHolder<T, K> {
+	private static final Logger logger = Logger.getLogger(APIHolder.class);
+
 	private final Class<T> clazz;
 	private final Map<String, Method> setters;
 	private final Map<String, Method> getters;
@@ -106,6 +109,8 @@ public class APIHolder<T, K> {
 		try {
 			return clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
+			if (logger.isDebugEnabled())
+				e.printStackTrace();
 			throw new APIConfigurationException(
 					"An error occurred while calling the default constructor of the entity "
 							+ clazz, e);
@@ -121,7 +126,6 @@ public class APIHolder<T, K> {
 			throw new APIParsingException("Unknown property: " + name);
 		else
 			try {
-				System.out.println("VALUE: " + value.getClass());
 				if (value instanceof Integer) {
 					// Fix for long values
 					Method getter = this.getters.get(name);
@@ -131,6 +135,8 @@ public class APIHolder<T, K> {
 					setter.invoke(entity, value);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
+				if (logger.isDebugEnabled())
+					e.printStackTrace();
 				throw new APIParsingException("Error while setting the property: " + name, e);
 			}
 		return entity;
@@ -147,15 +153,20 @@ public class APIHolder<T, K> {
 				return getter.invoke(entity);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
+				if (logger.isDebugEnabled())
+					e.printStackTrace();
 				throw new APIParsingException("Unknown property: " + name, e);
 			}
 	}
 
+	@SuppressWarnings("unchecked")
 	public K getId(T entity) {
 		try {
 			return (K) this.idGetter.invoke(entity);
 		} catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
+			if (logger.isDebugEnabled())
+				e.printStackTrace();
 			throw new APIParsingException("Error while retrieving the entity id.", e);
 		}
 	}

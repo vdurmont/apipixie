@@ -1,5 +1,6 @@
 package com.ligati.apipixie;
 
+import com.ligati.apipixie.exception.APIUsageException;
 import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.model.Entity;
 import com.ligati.apipixie.model.EntityWithUrl;
@@ -134,6 +135,88 @@ public class APIServiceTest {
 		assertEquals(text, entity.getText());
 
 		verify(this.http).putObject(anyString(), any(JSONObject.class));
+	}
+
+	@Test
+	public void post_creates_and_returns_the_entity_with_its_id() throws JSONException {
+		// GIVEN
+		String text = "my text";
+		Entity entity = new Entity();
+		entity.setText(text);
+
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		Long id = 42L;
+		JSONObject json = generateEntityJSON(text);
+		json.put("id", id);
+		when(this.http.postObject(anyString(), any(JSONObject.class))).thenReturn(json);
+
+		// WHEN
+		Entity created = service.post(entity);
+
+		// THEN
+		assertEquals(id, created.getId());
+		assertEquals(text, created.getText());
+		verify(this.http).postObject(anyString(), any(JSONObject.class));
+	}
+
+	@Test
+	public void delete_deletes_the_entity() throws JSONException {
+		// GIVEN
+		Long id = 42L;
+		String text = "my text";
+		Entity entity = new Entity();
+		entity.setId(id);
+		entity.setText(text);
+
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		// WHEN
+		service.delete(entity);
+
+		// THEN
+		verify(this.http).deleteObject(anyString());
+	}
+
+	@Test
+	public void delete_if_null_entity_fails() throws JSONException {
+		// GIVEN
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		// THEN
+		verifyZeroInteractions(this.http);
+		this.expectedEx.expect(APIUsageException.class);
+
+		// WHEN
+		service.delete(null);
+	}
+
+	@Test
+	public void delete_if_no_id_fails() throws JSONException {
+		// GIVEN
+		Entity entity = new Entity();
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		// THEN
+		verifyZeroInteractions(this.http);
+		this.expectedEx.expect(APIUsageException.class);
+
+		// WHEN
+		service.delete(entity);
+	}
+
+	@Test
+	public void delete_with_id_deletes_the_entity() throws JSONException {
+		// GIVEN
+		Long id = 42L;
+
+		APIService<Entity, Long> service = new APIService<>(pixie, Entity.class, http);
+
+		// WHEN
+		service.deleteById(id);
+
+		// THEN
+		verify(this.http).deleteObject(anyString());
 	}
 
 	private static JSONObject generateEntityJSON(String text) throws JSONException {

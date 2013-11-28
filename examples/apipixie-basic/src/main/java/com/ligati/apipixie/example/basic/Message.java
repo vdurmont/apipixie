@@ -25,12 +25,10 @@ public class Message {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Message [id=");
-		builder.append(id);
-		builder.append(", text=");
-		builder.append(text);
-		builder.append("]");
-		return builder.toString();
+		final StringBuilder sb = new StringBuilder("Message{");
+		sb.append("id=").append(id);
+		sb.append(", text='").append(text).append('\'');
+		sb.append('}');
+		return sb.toString();
 	}
 }

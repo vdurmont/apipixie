@@ -4,6 +4,7 @@ import com.ligati.apipixie.exception.APIParsingException;
 import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.tools.APIHolder;
 import com.ligati.apipixie.tools.AnnotationUtil;
+import com.ligati.apipixie.tools.Preconditionner;
 import com.ligati.apipixie.tools.UrlUtil;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -49,12 +50,32 @@ public class APIService<T, K> {
 		return this.jsonObjectToEntity(json);
 	}
 
+	public T post(T entity) {
+		logger.debug("Posting a " + entityName);
+		JSONObject json = entityToJsonObject(entity);
+		json = this.http.postObject(this.buildUrl(""), json);
+		return this.jsonObjectToEntity(json);
+	}
+
 	public T put(T entity) {
 		logger.debug("Putting a " + entityName);
 		K id = this.holder.getId(entity);
 		JSONObject json = entityToJsonObject(entity);
 		json = this.http.putObject(this.buildUrl(id.toString()), json);
 		return this.jsonObjectToEntity(json);
+	}
+
+	public void delete(T entity) {
+		Preconditionner.checkNotNull(entity, "The given entity is null.");
+		K id = this.holder.getId(entity);
+		Preconditionner.checkNotNull(id, "The given entity has no id.");
+		this.deleteById(id);
+	}
+
+	public void deleteById(K id) {
+		logger.debug("Deleting the " + entityName + "#" + id);
+		Preconditionner.checkNotNull(id, "The given id is null.");
+		this.http.deleteObject(this.buildUrl(id.toString()));
 	}
 
 	private String buildUrl(String path) {
@@ -77,6 +98,8 @@ public class APIService<T, K> {
 				T entity = this.jsonObjectToEntity(json);
 				list.add(entity);
 			} catch (JSONException e) {
+				if (logger.isDebugEnabled())
+					e.printStackTrace();
 				throw new APIParsingException("An error occurred while reading the json array", e);
 			}
 		}
@@ -89,6 +112,8 @@ public class APIService<T, K> {
 			try {
 				entity = this.holder.set(entity, name, json.get(name));
 			} catch (JSONException e) {
+				if (logger.isDebugEnabled())
+					e.printStackTrace();
 				throw new APIParsingException("An error occurred while reading the json property: " + name, e);
 			}
 		}
@@ -101,6 +126,8 @@ public class APIService<T, K> {
 			try {
 				json.put(property, this.holder.get(entity, property));
 			} catch (JSONException e) {
+				if (logger.isDebugEnabled())
+					e.printStackTrace();
 				throw new APIParsingException("An error occurred while reading the entity field: " + property, e);
 			}
 		return json;
