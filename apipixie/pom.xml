@@ -4,10 +4,10 @@
 
     <groupId>com.ligati</groupId>
     <artifactId>apipixie</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
     <packaging>jar</packaging>
 
-    <name>betaseries-java</name>
+    <name>apipixie</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -18,10 +18,10 @@ Just add the maven dependency to your project:
 	<dependency>
 		<groupId>com.ligati</groupId>
 		<artifactId>apipixie</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>0.1</version>
 	</dependency>
 
-This dependency ~~is~~ will be available on the [Maven Central Repository](http://search.maven.org/).
+This dependency ~~is~~ **will be** available on the [Maven Central Repository](http://search.maven.org/).
 
 ### Annotate your model
 
@@ -95,6 +95,7 @@ Here are the different types of exceptions and their meaning:
 
 APIPixie depends on some basic libraries. Check out the `pom.xml` file for the versions.
 
+* `commons-io > commons-io` is used to read the web streams and convert them to Strings.
 * `org.json > json` is used to manipulate all the JSON objects in APIPixie.
 * `org.apache.httpcomponents > httpclient` is used for all the requests sent to the distant APIs.
 * `org.slf4j > slf4j-log4j12` is used to log the actions made by APIPixie.
