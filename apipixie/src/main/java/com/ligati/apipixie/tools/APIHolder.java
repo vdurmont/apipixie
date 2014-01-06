@@ -151,8 +151,7 @@ public class APIHolder<T, K> {
 		else
 			try {
 				return getter.invoke(entity);
-			} catch (IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				if (logger.isDebugEnabled())
 					e.printStackTrace();
 				throw new APIParsingException("Unknown property: " + name, e);
