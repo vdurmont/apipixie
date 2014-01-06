@@ -9,7 +9,7 @@
 	</appender>
 
 	<logger name="com.ligati.apipixie">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 
 	<root>
