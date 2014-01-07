@@ -91,6 +91,29 @@ Here are the different types of exceptions and their meaning:
 * `APIUsageException`: this error occurs when your usage of APIPixie is invalid (example: call the put method with a null object).
 * `APIPixieException`: mother of all the APIPixie exceptions, something went terribly wrong!
 
+## Advanced configuration
+
+### Custom HTTPManager
+
+If you have specific needs on the way to execute the HTTP requests, just implement the `APIHttpManager` interface and build your APIPixie instance this way:
+
+	APIPixie pixie = new APIPixie(myAPIUrl, new MyCustomHttpManager());
+
+The default is `DefaultHttpManager`. We also provide a `BasicAuthHttpManager` which enables you to communicate with the API using [basic access authentication](http://en.wikipedia.org/wiki/Basic_access_authentication).
+
+If you write your own APIHttpManager, do not hesitate to check out the `APIHttpUtil` class.
+
+### Features
+
+APIPixie relies on a set of features which define its behavior. Those features are in the class `APIPixieFeature` and have a default value for the basic usage. You can configure those features this way:
+
+	APIPixie pixie = new APIPixie(myAPIUrl);
+	pixie.configure(APIPixieFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+
+The current features are:
+
+* `FAIL_ON_UNKNOWN_PROPERTIES`: whether or not APIPixie has to raise an exception when it receives an unknown property from the server. (Default: `false`)
+
 ## Dependencies
 
 APIPixie depends on some basic libraries. Check out the `pom.xml` file for the versions.
