@@ -10,7 +10,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import static org.junit.Assert.*;

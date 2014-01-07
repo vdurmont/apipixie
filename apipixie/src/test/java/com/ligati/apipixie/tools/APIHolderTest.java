@@ -1,14 +1,13 @@
 package com.ligati.apipixie.tools;
 
+import com.ligati.apipixie.exception.APIConfigurationException;
+import com.ligati.apipixie.exception.APIParsingException;
 import com.ligati.apipixie.model.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import com.ligati.apipixie.exception.APIConfigurationException;
-import com.ligati.apipixie.exception.APIParsingException;
 
 import static org.junit.Assert.*;
 

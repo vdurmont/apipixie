@@ -1,16 +1,15 @@
 package com.ligati.apipixie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import com.ligati.apipixie.exception.APIConfigurationException;
+import com.ligati.apipixie.model.Entity;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import com.ligati.apipixie.exception.APIConfigurationException;
-import com.ligati.apipixie.model.Entity;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(JUnit4.class)
 public class APIPixieTest {
