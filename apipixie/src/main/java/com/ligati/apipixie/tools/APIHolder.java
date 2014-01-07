@@ -1,5 +1,6 @@
 package com.ligati.apipixie.tools;
 
+import com.ligati.apipixie.APIPixieFeature;
 import com.ligati.apipixie.annotation.APIId;
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
@@ -17,10 +18,12 @@ public class APIHolder<T, K> {
 	private final Map<String, Method> setters;
 	private final Map<String, Method> getters;
 	private final Set<String> propertiesNames;
+	private final boolean failOnUnknownProperties;
 	private Method idGetter;
 
-	public APIHolder(Class<T> clazz) {
+	public APIHolder(Class<T> clazz, boolean failOnUnknownProperties) {
 		this.clazz = clazz;
+		this.failOnUnknownProperties = failOnUnknownProperties;
 		AnnotationUtil.getEntityAnnotation(clazz);
 		this.setters = new HashMap<>();
 		this.getters = new HashMap<>();
@@ -121,10 +124,12 @@ public class APIHolder<T, K> {
 	public T set(T entity, String name, Object value) {
 		if (entity == null)
 			throw new APIParsingException("Null entity");
+		if (name == null || name.isEmpty())
+			throw new APIParsingException("Invalid property name (null or empty)");
 		Method setter = this.setters.get(name);
-		if (setter == null)
+		if (setter == null && this.failOnUnknownProperties)
 			throw new APIParsingException("Unknown property: " + name);
-		else
+		else if (setter != null)
 			try {
 				if (value instanceof Integer) {
 					// Fix for long values

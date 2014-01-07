@@ -21,7 +21,7 @@ public class APIHolderTest {
 		// GIVEN
 
 		// WHEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity instance = holder.create();
 
 		// THEN
@@ -37,7 +37,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz).create();
+		new APIHolder<>(clazz, false).create();
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class APIHolderTest {
 		this.expectedEx.expect(APIConfigurationException.class);
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class APIHolderTest {
 		Class<?> clazz = EntityWithoutIdPropertyButAnAPIIdAnnotation.class;
 
 		// WHEN
-		new APIHolder<>(clazz);
+		new APIHolder<>(clazz, false);
 
 		// THEN
 		// It's ok
@@ -115,7 +115,7 @@ public class APIHolderTest {
 	@Test
 	public void set_with_null_entity_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 
 		// THEN
 		this.expectedEx.expect(APIParsingException.class);
@@ -127,7 +127,7 @@ public class APIHolderTest {
 	@Test
 	public void set_with_null_name_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 
 		// THEN
@@ -140,7 +140,7 @@ public class APIHolderTest {
 	@Test
 	public void set_with_empty_name_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 
 		// THEN
@@ -151,9 +151,35 @@ public class APIHolderTest {
 	}
 
 	@Test
+	public void set_with_unknown_property_name_and_FAIL_ON_UNKNOWN_PROPERTIES_configuration_to_true_fails() {
+		// GIVEN
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, true);
+		Entity entity = new Entity();
+
+		// THEN
+		this.expectedEx.expect(APIParsingException.class);
+
+		// WHEN
+		holder.set(entity, "unknownproperty", "my text");
+	}
+
+	@Test
+	public void set_with_unknown_property_name_and_FAIL_ON_UNKNOWN_PROPERTIES_configuration_to_false_doesnt_fail() {
+		// GIVEN
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
+		Entity entity = new Entity();
+
+		// WHEN
+		holder.set(entity, "unknownproperty", "my text");
+
+		// THEN
+		// Nothing happened.
+	}
+
+	@Test
 	public void set_sets_the_value() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 		String text = "my text";
 
@@ -167,7 +193,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_null_entity_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 
 		// THEN
 		this.expectedEx.expect(APIParsingException.class);
@@ -179,7 +205,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_null_name_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 
 		// THEN
@@ -192,7 +218,7 @@ public class APIHolderTest {
 	@Test
 	public void get_with_empty_name_fails() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 
 		// THEN
@@ -205,7 +231,7 @@ public class APIHolderTest {
 	@Test
 	public void get_a_null_field_returns_null() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 
 		// WHEN
@@ -218,7 +244,7 @@ public class APIHolderTest {
 	@Test
 	public void get_a_field_returns_its_value() {
 		// GIVEN
-		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class);
+		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
 		Entity entity = new Entity();
 		String text = "my text";
 		entity.setText(text);

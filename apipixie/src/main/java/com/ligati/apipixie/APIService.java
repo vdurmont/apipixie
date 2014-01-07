@@ -25,7 +25,7 @@ public class APIService<T, K> {
 
 	public APIService(APIPixie pixie, Class<T> clazz, APIHttpManager http) {
 		this.pixie = pixie;
-		this.holder = new APIHolder<>(clazz);
+		this.holder = new APIHolder<>(clazz, pixie.isFeatureEnabled(APIPixieFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 		this.http = http;
 		this.entityName = clazz.getSimpleName();
 		this.entityUrl = this.getEntityUrl(clazz);
