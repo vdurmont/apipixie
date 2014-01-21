@@ -21,7 +21,7 @@ Just add the maven dependency to your project:
 		<version>0.1</version>
 	</dependency>
 
-This dependency ~~is~~ **will be** available on the [Maven Central Repository](http://search.maven.org/). In the meantime, you can just add the jar into your classpath.
+This dependency ~~is~~ **will be** available on the [Maven Central Repository](http://search.maven.org/). In the meantime, you can just add the jar into your classpath (or clone this repo an `mvn clean install` to have the jar in your .m2).
 
 ### Annotate your model
 
