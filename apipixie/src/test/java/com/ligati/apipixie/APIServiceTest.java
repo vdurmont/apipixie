@@ -3,6 +3,8 @@ package com.ligati.apipixie;
 import com.ligati.apipixie.exception.APIUsageException;
 import com.ligati.apipixie.http.APIHttpManager;
 import com.ligati.apipixie.model.Entity;
+import com.ligati.apipixie.model.EntityWithBasicCollectionAPICollection;
+import com.ligati.apipixie.model.EntityWithEntityCollectionAPICollection;
 import com.ligati.apipixie.model.EntityWithUrl;
 import com.ligati.apipixie.tools.AnnotationUtil;
 import org.json.JSONArray;
@@ -224,5 +226,51 @@ public class APIServiceTest {
 		entity.put("id", IDS++);
 		entity.put("text", text);
 		return entity;
+	}
+
+	@Test
+	public void jsonObjectToEntity_with_an_array_and_a_basic_collection_maps_the_array() throws JSONException {
+		// GIVEN
+		APIService<EntityWithBasicCollectionAPICollection, Long> service = new APIService<>(pixie, EntityWithBasicCollectionAPICollection.class, http);
+
+		JSONObject json = new JSONObject();
+		JSONArray array = new JSONArray();
+		array.put("first");
+		array.put("second");
+		json.put("strings", array);
+
+
+		// WHEN
+		EntityWithBasicCollectionAPICollection entity = service.jsonObjectToEntity(json);
+
+		// THEN
+		assertEquals(2, entity.getStrings().size());
+		assertEquals("first", entity.getStrings().get(0));
+		assertEquals("second", entity.getStrings().get(1));
+	}
+
+	@Test
+	public void jsonObjectToEntity_with_an_array_and_an_APIEntity_collection_maps_the_array() throws JSONException {
+		// GIVEN
+		APIService<EntityWithEntityCollectionAPICollection, Long> service = new APIService<>(pixie, EntityWithEntityCollectionAPICollection.class, http);
+
+		JSONObject json = new JSONObject();
+		JSONArray array = new JSONArray();
+		JSONObject entity1 = new JSONObject();
+		entity1.put("id", 42);
+		array.put(entity1);
+		JSONObject entity2 = new JSONObject();
+		entity2.put("id", 43);
+		array.put(entity2);
+		json.put("entities", array);
+
+
+		// WHEN
+		EntityWithEntityCollectionAPICollection entity = service.jsonObjectToEntity(json);
+
+		// THEN
+		assertEquals(2, entity.getEntities().size());
+		assertEquals(new Long(42), entity.getEntities().get(0).getId());
+		assertEquals(new Long(43), entity.getEntities().get(1).getId());
 	}
 }

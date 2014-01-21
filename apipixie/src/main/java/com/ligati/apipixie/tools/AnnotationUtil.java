@@ -1,9 +1,9 @@
 package com.ligati.apipixie.tools;
 
+import com.ligati.apipixie.annotation.APICollection;
 import com.ligati.apipixie.annotation.APIEntity;
 import com.ligati.apipixie.exception.APIConfigurationException;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class AnnotationUtil {
@@ -17,28 +17,24 @@ public class AnnotationUtil {
 
 	public static <T> String getEntityUrl(Class<T> clazz) {
 		APIEntity annotation = getEntityAnnotation(clazz);
+		String url = annotation.url();
+		return url.isEmpty() ? null : url;
+	}
+
+	protected static APICollection getCollectionAnnotation(Field field) {
+		APICollection annotation = field.getAnnotation(APICollection.class);
 		if (annotation == null)
-			return null;
-		else {
-			String url = annotation.url();
-			return url.isEmpty() ? null : url;
-		}
+			throw new APIConfigurationException("The field " + field.getName()
+					+ " is not an APICollection.");
+		return annotation;
 	}
 
-	public static boolean hasAnnotation(Field field, Class<?> annotationClazz) {
-		Annotation[] annotations = field.getDeclaredAnnotations();
-		return hasAnnotation(annotations, annotationClazz);
-	}
-
-	public static boolean hasAnnotation(Class<?> clazz, Class<?> annotationClazz) {
-		Annotation[] annotations = clazz.getDeclaredAnnotations();
-		return hasAnnotation(annotations, annotationClazz);
-	}
-
-	private static boolean hasAnnotation(Annotation[] annotations, Class<?> annotationClazz) {
-		for (Annotation annotation : annotations)
-			if (annotationClazz.equals(annotation.annotationType()))
-				return true;
-		return false;
+	public static boolean isAPIEntityCollection(Field field) {
+		APICollection annotation = getCollectionAnnotation(field);
+		Class<?> collectionType = annotation.mappedClass();
+		if (TypeUtil.isBasicType(collectionType))
+			return false;
+		getEntityAnnotation(collectionType); // We check that the class is correctly annotated.
+		return true;
 	}
 }

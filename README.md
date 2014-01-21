@@ -114,6 +114,33 @@ The current features are:
 
 * `FAIL_ON_UNKNOWN_PROPERTIES`: whether or not APIPixie has to raise an exception when it receives an unknown property from the server. (Default: `false`)
 
+### Inheritance
+
+If you want to use inherited fields in your communication with the distant API, just annotate your parent classes with `@APISuperClass`. Here is a quick example:
+
+	@APISuperClass
+	public class MyParent {
+		private Long id;
+		// Getters & Setter
+	}
+
+	@APIEntity
+	public class MyChild extends MyParent {
+		// Code
+	}
+
+### Collections
+
+If one of you attributes is a collection (lists, sets, etc.), you have to annotate it with `@APICollection` and give in `mappedClass` the class of the parameter. The parameter can be another APIEntity!
+
+For example:
+
+	@APICollection(mappedClass = String.class)
+	private List<String> strings;
+
+	@APICollection(mappedClass = Entity.class)
+	private List<Entity> entities;
+
 ## Dependencies
 
 APIPixie depends on some basic libraries. Check out the `pom.xml` file for the versions.

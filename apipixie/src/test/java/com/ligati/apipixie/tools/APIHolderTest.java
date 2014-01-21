@@ -3,11 +3,15 @@ package com.ligati.apipixie.tools;
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
 import com.ligati.apipixie.model.*;
+import org.json.JSONArray;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -140,6 +144,54 @@ public class APIHolderTest {
 	public void construct_with_id_property_in_parent_class_not_APISuperClass_fails() {
 		// GIVEN
 		Class<?> clazz = EntityExtendingNotAPISuperClassWithAnIdProperty.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+	}
+
+	@Test
+	public void construct_with_basic_type_collection_and_no_APICollection_fails() {
+		// GIVEN
+		Class<?> clazz = EntityWithBasicCollectionNotAPICollection.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+	}
+
+	@Test
+	public void construct_with_basic_type_collection_and_APICollection_is_ok() {
+		// GIVEN
+		Class<?> clazz = EntityWithBasicCollectionAPICollection.class;
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+
+		// THEN
+		// It's ok
+	}
+
+	@Test
+	public void construct_with_APIEntity_collection_and_APICollection_is_ok() {
+		// GIVEN
+		Class<?> clazz = EntityWithEntityCollectionAPICollection.class;
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+
+		// THEN
+		// It's ok
+	}
+
+	@Test
+	public void construct_with_APIEntity_collection_and_not_APICollection_fails() {
+		// GIVEN
+		Class<?> clazz = EntityWithEntityCollectionNotAPICollection.class;
 
 		// THEN
 		this.expectedEx.expect(APIConfigurationException.class);

@@ -1,5 +1,6 @@
 package com.ligati.apipixie.tools;
 
+import com.ligati.apipixie.annotation.APICollection;
 import com.ligati.apipixie.annotation.APIEntity;
 import com.ligati.apipixie.annotation.APIId;
 import com.ligati.apipixie.annotation.APISuperClass;
@@ -18,6 +19,7 @@ public class APIHolder<T, K> {
 	private final Class<T> clazz;
 	private final Map<String, Method> setters;
 	private final Map<String, Method> getters;
+	private final Map<String, ComplexField> complexFields;
 	private final Set<String> propertiesNames;
 	private final boolean failOnUnknownProperties;
 	private Method idGetter;
@@ -28,6 +30,7 @@ public class APIHolder<T, K> {
 		AnnotationUtil.getEntityAnnotation(clazz);
 		this.setters = new HashMap<>();
 		this.getters = new HashMap<>();
+		this.complexFields = new HashMap<>();
 		this.propertiesNames = new HashSet<>();
 		this.extractMethods(clazz);
 	}
@@ -36,7 +39,35 @@ public class APIHolder<T, K> {
 		Map<Field, Method> idCandidates = new HashMap<>();
 		List<Field> fields = getFields(clazz);
 		for (Field field : fields) {
-			boolean isIdCandidate = "id".equals(field.getName()) || AnnotationUtil.hasAnnotation(field, APIId.class);
+			if (!TypeUtil.isBasicType(field.getType())) {
+				// If it is not a basic type, there are 5 possibilities:
+				ComplexField complexField = null;
+
+				// 1) It's a collection (basic or APIEntity)
+				boolean isAPICollection = field.isAnnotationPresent(APICollection.class);
+				if (isAPICollection) {
+					ComplexField.FieldType collectionType = AnnotationUtil.isAPIEntityCollection(field) ? ComplexField.FieldType.ENTITY_COLLECTION : ComplexField.FieldType.BASIC_COLLECTION;
+					Class<?> mappedClass = AnnotationUtil.getCollectionAnnotation(field).mappedClass();
+					complexField = new ComplexField(collectionType, mappedClass, (Class<? extends Collection>) field.getType());
+				}
+
+				// 3) It's a date
+				// TODO Handle the dates (an @APITemporal annotation?)
+
+				// 4) It's an enumerate
+				// TODO Handle the enumerates (an @APIEnum annotation?)
+
+				// 5) It's a nested APIEntity
+				// TODO Handle the nested APIEntities
+
+				// 6) It's an error!
+				if (complexField == null)
+					throw new APIConfigurationException("The field " + field.getName() + " is not a basic type but there is no annotation defining how it should be treated.");
+
+				this.complexFields.put(field.getName(), complexField);
+			}
+
+			boolean isIdCandidate = "id".equals(field.getName()) || field.isAnnotationPresent(APIId.class);
 
 			String fieldName = this.getFieldNameForMethod(field);
 			this.propertiesNames.add(field.getName());
@@ -71,8 +102,8 @@ public class APIHolder<T, K> {
 		List<Field> fields = new LinkedList<>();
 		Set<String> names = new HashSet<>();
 		Class<?> tmp = clazz;
-		while (AnnotationUtil.hasAnnotation(tmp, APISuperClass.class) ||
-				AnnotationUtil.hasAnnotation(tmp, APIEntity.class)) {
+		while (tmp.isAnnotationPresent(APISuperClass.class) ||
+				tmp.isAnnotationPresent(APIEntity.class)) {
 			for (Field field : tmp.getDeclaredFields()) {
 				fields.add(field);
 				names.add(field.getName());
@@ -124,10 +155,10 @@ public class APIHolder<T, K> {
 				if (firstField == null) {
 					// First element
 					firstField = field;
-					firstFieldHasAnnotation = AnnotationUtil.hasAnnotation(field, APIId.class);
+					firstFieldHasAnnotation = field.isAnnotationPresent(APIId.class);
 				} else {
 					// Second element
-					if (firstFieldHasAnnotation && AnnotationUtil.hasAnnotation(field, APIId.class))
+					if (firstFieldHasAnnotation && field.isAnnotationPresent(APIId.class))
 						throw new APIConfigurationException("Too many candidates to be an id in the entity.");
 					else if (firstFieldHasAnnotation)
 						this.idGetter = candidates.get(firstField);
@@ -163,12 +194,10 @@ public class APIHolder<T, K> {
 			throw new APIParsingException("Unknown property: " + name);
 		else if (setter != null)
 			try {
-				if (value instanceof Integer) {
-					// Fix for long values
-					Method getter = this.getters.get(name);
-					if (Long.class.equals(getter.getReturnType()))
-						setter.invoke(entity, Long.valueOf((int) value));
-				} else
+				Method getter = this.getters.get(name);
+				if (value instanceof Integer && Long.class.equals(getter.getReturnType()))
+					setter.invoke(entity, Long.valueOf((int) value));
+				else
 					setter.invoke(entity, value);
 			} catch (IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
@@ -209,5 +238,9 @@ public class APIHolder<T, K> {
 
 	public Set<String> getPropertiesNames() {
 		return this.propertiesNames;
+	}
+
+	public ComplexField getComplexField(String name) {
+		return this.complexFields.get(name);
 	}
 }

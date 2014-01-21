@@ -2,15 +2,14 @@ package com.ligati.apipixie;
 
 import com.ligati.apipixie.exception.APIParsingException;
 import com.ligati.apipixie.http.APIHttpManager;
-import com.ligati.apipixie.tools.APIHolder;
-import com.ligati.apipixie.tools.AnnotationUtil;
-import com.ligati.apipixie.tools.Preconditionner;
-import com.ligati.apipixie.tools.UrlUtil;
+import com.ligati.apipixie.tools.*;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -106,18 +105,51 @@ public class APIService<T, K> {
 		return list;
 	}
 
-	private T jsonObjectToEntity(JSONObject json) {
+	protected T jsonObjectToEntity(JSONObject json) {
 		T entity = this.holder.create();
 		for (String name : JSONObject.getNames(json)) {
 			try {
-				entity = this.holder.set(entity, name, json.get(name));
-			} catch (JSONException e) {
+				ComplexField complexField = this.holder.getComplexField(name);
+				if (complexField != null)
+					entity = this.processComplexFieldJsonToEntity(complexField, entity, json, name);
+				else
+					entity = this.holder.set(entity, name, json.get(name));
+			} catch (JSONException | InstantiationException | IllegalAccessException e) {
 				if (logger.isDebugEnabled())
 					e.printStackTrace();
 				throw new APIParsingException("An error occurred while reading the json property: " + name, e);
 			}
 		}
 		return entity;
+	}
+
+	private T processComplexFieldJsonToEntity(ComplexField complexField, T entity, JSONObject json, String propertyName) throws InstantiationException, IllegalAccessException, JSONException {
+		switch (complexField.getType()) {
+			case BASIC_COLLECTION:
+				return this.processBasicCollectionJsonToEntity(complexField, entity, json, propertyName);
+			case ENTITY_COLLECTION:
+				return this.processEntityCollectionJsonToEntity(complexField, entity, json, propertyName);
+		}
+		throw new NotImplementedException();
+	}
+
+	@SuppressWarnings("unchecked")
+	private T processBasicCollectionJsonToEntity(ComplexField complexField, T entity, JSONObject json, String propertyName) throws InstantiationException, IllegalAccessException, JSONException {
+		JSONArray array = json.getJSONArray(propertyName);
+		Collection collection = complexField.getCollectionClass().newInstance();
+		for (int i = 0; i < array.length(); i++)
+			collection.add(array.get(i));
+		return this.holder.set(entity, propertyName, collection);
+	}
+
+	@SuppressWarnings("unchecked")
+	private T processEntityCollectionJsonToEntity(ComplexField complexField, T entity, JSONObject json, String propertyName) throws InstantiationException, IllegalAccessException, JSONException {
+		JSONArray array = json.getJSONArray(propertyName);
+		Collection collection = complexField.getCollectionClass().newInstance();
+		APIService service = new APIService(pixie, complexField.getClazz(), http);
+		for (int i = 0; i < array.length(); i++)
+			collection.add(service.jsonObjectToEntity(array.getJSONObject(i)));
+		return this.holder.set(entity, propertyName, collection);
 	}
 
 	private JSONObject entityToJsonObject(T entity) {
