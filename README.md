@@ -154,3 +154,19 @@ Some dependencies were added for the tests:
 
 * `junit > junit`
 * `org.mockito > mockito-core`
+
+## Changelog
+
+### Version 0.2 (in progress)
+
+* Support for nested APIEntities
+* Support for basic collections (Strings, Longs, etc.)
+* Support for APIEntities collections
+* Support for APISuperClass (inherited properties)
+
+### Version 0.1
+
+* First release, first implementation
+* Support for APIEntity
+* Support for custom APIId
+* HTTP Basic Auth manager implementation
