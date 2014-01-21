@@ -37,4 +37,9 @@ public class AnnotationUtil {
 		getEntityAnnotation(collectionType); // We check that the class is correctly annotated.
 		return true;
 	}
+
+	public static boolean referencesAPIEntity(Field field) {
+		APIEntity annotation = field.getType().getAnnotation(APIEntity.class);
+		return annotation != null;
+	}
 }

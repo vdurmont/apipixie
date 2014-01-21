@@ -2,10 +2,7 @@ package com.ligati.apipixie;
 
 import com.ligati.apipixie.exception.APIUsageException;
 import com.ligati.apipixie.http.APIHttpManager;
-import com.ligati.apipixie.model.Entity;
-import com.ligati.apipixie.model.EntityWithBasicCollectionAPICollection;
-import com.ligati.apipixie.model.EntityWithEntityCollectionAPICollection;
-import com.ligati.apipixie.model.EntityWithUrl;
+import com.ligati.apipixie.model.*;
 import com.ligati.apipixie.tools.AnnotationUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -272,5 +269,25 @@ public class APIServiceTest {
 		assertEquals(2, entity.getEntities().size());
 		assertEquals(new Long(42), entity.getEntities().get(0).getId());
 		assertEquals(new Long(43), entity.getEntities().get(1).getId());
+	}
+
+	@Test
+	public void jsonObjectToEntity_with_a_nested_APIEntity_maps_the_entity() throws JSONException {
+		// GIVEN
+		APIService<EntityWithNestedEntity, Long> service = new APIService<>(pixie, EntityWithNestedEntity.class, http);
+
+		JSONObject json = new JSONObject();
+		json.put("id", 42);
+		JSONObject nested = new JSONObject();
+		nested.put("id", 43);
+		json.put("entity", nested);
+
+
+		// WHEN
+		EntityWithNestedEntity entity = service.jsonObjectToEntity(json);
+
+		// THEN
+		assertEquals(new Long(42), entity.getId());
+		assertEquals(new Long(43), entity.getEntity().getId());
 	}
 }

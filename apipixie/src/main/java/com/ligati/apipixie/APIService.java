@@ -129,6 +129,8 @@ public class APIService<T, K> {
 				return this.processBasicCollectionJsonToEntity(complexField, entity, json, propertyName);
 			case ENTITY_COLLECTION:
 				return this.processEntityCollectionJsonToEntity(complexField, entity, json, propertyName);
+			case NESTED_ENTITY:
+				return this.processNestedEntityJsonToEntity(complexField, entity, json, propertyName);
 		}
 		throw new NotImplementedException();
 	}
@@ -150,6 +152,14 @@ public class APIService<T, K> {
 		for (int i = 0; i < array.length(); i++)
 			collection.add(service.jsonObjectToEntity(array.getJSONObject(i)));
 		return this.holder.set(entity, propertyName, collection);
+	}
+
+	@SuppressWarnings("unchecked")
+	private T processNestedEntityJsonToEntity(ComplexField complexField, T entity, JSONObject json, String propertyName) throws InstantiationException, IllegalAccessException, JSONException {
+		JSONObject nestedJSON = json.getJSONObject(propertyName);
+		APIService service = new APIService(pixie, complexField.getClazz(), http);
+		Object nestedEntity = service.jsonObjectToEntity(nestedJSON);
+		return this.holder.set(entity, propertyName, nestedEntity);
 	}
 
 	private JSONObject entityToJsonObject(T entity) {

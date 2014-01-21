@@ -58,7 +58,8 @@ public class APIHolder<T, K> {
 				// TODO Handle the enumerates (an @APIEnum annotation?)
 
 				// 5) It's a nested APIEntity
-				// TODO Handle the nested APIEntities
+				if (AnnotationUtil.referencesAPIEntity(field))
+					complexField = new ComplexField(ComplexField.FieldType.NESTED_ENTITY, field.getType());
 
 				// 6) It's an error!
 				if (complexField == null)
