@@ -1,6 +1,5 @@
 package com.ligati.apipixie.tools;
 
-import com.ligati.apipixie.APIPixieFeature;
 import com.ligati.apipixie.annotation.APIId;
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
@@ -33,7 +32,8 @@ public class APIHolder<T, K> {
 
 	private void extractMethods(Class<T> clazz) {
 		Map<Field, Method> idCandidates = new HashMap<>();
-		for (Field field : clazz.getDeclaredFields()) {
+		List<Field> fields = getFields(clazz);
+		for (Field field : fields) {
 			boolean isIdCandidate = "id".equals(field.getName()) || AnnotationUtil.hasAnnotation(field, APIId.class);
 
 			String fieldName = this.getFieldNameForMethod(field);
@@ -64,6 +64,16 @@ public class APIHolder<T, K> {
 		}
 
 		this.resolveId(idCandidates);
+	}
+
+	private static List<Field> getFields(Class<?> clazz) {
+		List<Field> fields = new LinkedList<>();
+		Class<?> tmp = clazz;
+		while (!Object.class.equals(tmp)) {
+			fields.addAll(Arrays.asList(tmp.getDeclaredFields()));
+			tmp = tmp.getSuperclass();
+		}
+		return fields;
 	}
 
 	private String getFieldNameForMethod(Field field) {

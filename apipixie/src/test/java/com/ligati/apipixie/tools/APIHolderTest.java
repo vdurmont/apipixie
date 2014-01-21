@@ -113,6 +113,18 @@ public class APIHolderTest {
 	}
 
 	@Test
+	public void construct_with_id_property_in_parent_class_is_ok() {
+		// GIVEN
+		Class<?> clazz = EntityExtendingAClassWithAnIdProperty.class;
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+
+		// THEN
+		// It's ok
+	}
+
+	@Test
 	public void set_with_null_entity_fails() {
 		// GIVEN
 		APIHolder<Entity, Long> holder = new APIHolder<>(Entity.class, false);
