@@ -47,7 +47,7 @@ public class APIHttpUtil {
 			DefaultHttpClient client = new DefaultHttpClient();
 			addHeaders(req, headers);
 			HttpResponse res = client.execute(req);
-			analyzeStatusCode(res, req.getURI().toString());
+			analyzeStatusCode(res, req);
 			// case of DELETE for 204 http status codes
 			if (clazz == null)
 				return null;
@@ -70,7 +70,8 @@ public class APIHttpUtil {
 				req.addHeader(header);
 	}
 
-	private static void analyzeStatusCode(HttpResponse res, String url) {
+	private static void analyzeStatusCode(HttpResponse res, HttpUriRequest req) {
+		String url = req.getURI().toString();
 		int statusCode = res.getStatusLine().getStatusCode();
 		logger.debug("Status code received from the API: " + statusCode);
 		if (100 <= statusCode && statusCode < 200) {
@@ -84,7 +85,7 @@ public class APIHttpUtil {
 			} catch (Exception e) {
 			}
 			throw new APIHTTPException(statusCode, res.getStatusLine()
-					.getReasonPhrase(), content, url);
+					.getReasonPhrase(), content, url, req);
 		}
 	}
 }
