@@ -1,6 +1,9 @@
 package com.ligati.apipixie.model;
 
-public class EntityWithIdButNoAnnotation {
+import com.ligati.apipixie.annotation.APISuperClass;
+
+@APISuperClass
+public class APISuperClassWithId {
 	private Long id;
 
 	public Long getId() {

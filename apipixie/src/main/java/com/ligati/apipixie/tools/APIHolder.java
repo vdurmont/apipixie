@@ -1,6 +1,8 @@
 package com.ligati.apipixie.tools;
 
+import com.ligati.apipixie.annotation.APIEntity;
 import com.ligati.apipixie.annotation.APIId;
+import com.ligati.apipixie.annotation.APISuperClass;
 import com.ligati.apipixie.exception.APIConfigurationException;
 import com.ligati.apipixie.exception.APIParsingException;
 import org.apache.log4j.Logger;
@@ -46,8 +48,7 @@ public class APIHolder<T, K> {
 				Method setter = clazz.getMethod(setterName, type);
 				this.setters.put(field.getName(), setter);
 			} catch (NoSuchMethodException | SecurityException e) {
-				throw new APIConfigurationException(
-						"An error occurred while searching for the setter: " + setterName + "(" + type + ")", e);
+				throw new APIConfigurationException("An error occurred while searching for the setter: " + setterName + "(" + type + ") in the class " + clazz, e);
 			}
 
 			// Getter
@@ -59,7 +60,7 @@ public class APIHolder<T, K> {
 					idCandidates.put(field, getter);
 			} catch (NoSuchMethodException | SecurityException e) {
 				throw new APIConfigurationException(
-						"An error occurred while searching for the getter: " + getterName + "()", e);
+						"An error occurred while searching for the getter: " + getterName + "() in the class " + clazz, e);
 			}
 		}
 
@@ -68,12 +69,33 @@ public class APIHolder<T, K> {
 
 	private static List<Field> getFields(Class<?> clazz) {
 		List<Field> fields = new LinkedList<>();
+		Set<String> names = new HashSet<>();
 		Class<?> tmp = clazz;
-		while (!Object.class.equals(tmp)) {
-			fields.addAll(Arrays.asList(tmp.getDeclaredFields()));
+		while (AnnotationUtil.hasAnnotation(tmp, APISuperClass.class) ||
+				AnnotationUtil.hasAnnotation(tmp, APIEntity.class)) {
+			for (Field field : tmp.getDeclaredFields()) {
+				fields.add(field);
+				names.add(field.getName());
+			}
 			tmp = tmp.getSuperclass();
 		}
+		if (fields.size() != names.size()) {
+			Set<String> duplicates = getDuplicatesProperties(fields);
+			throw new APIConfigurationException("Duplicate propert" + (duplicates.size() > 1 ? "ies" : "y") + " in type hierarchy of class " + clazz + ": " + duplicates);
+		}
 		return fields;
+	}
+
+	private static Set<String> getDuplicatesProperties(List<Field> fields) {
+		Set<String> duplicates = new HashSet<>();
+		List<String> names = new LinkedList<>();
+		for (Field field : fields) {
+			String name = field.getName();
+			if (names.contains(name))
+				duplicates.add(name);
+			names.add(name);
+		}
+		return duplicates;
 	}
 
 	private String getFieldNameForMethod(Field field) {

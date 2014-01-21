@@ -113,15 +113,39 @@ public class APIHolderTest {
 	}
 
 	@Test
-	public void construct_with_id_property_in_parent_class_is_ok() {
+	public void construct_with_id_property_in_parent_class_APISuperClass_is_ok() {
 		// GIVEN
-		Class<?> clazz = EntityExtendingAClassWithAnIdProperty.class;
+		Class<?> clazz = EntityExtendingAPISuperClassWithAnIdProperty.class;
 
 		// WHEN
 		new APIHolder<>(clazz, false);
 
 		// THEN
 		// It's ok
+	}
+
+	@Test
+	public void construct_with_duplicate_property_in_parent_class_APISuperClass_fails() {
+		// GIVEN
+		Class<?> clazz = EntityExtendingAPISuperClassWithDuplicationOfProperty.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz, false);
+	}
+
+	@Test
+	public void construct_with_id_property_in_parent_class_not_APISuperClass_fails() {
+		// GIVEN
+		Class<?> clazz = EntityExtendingNotAPISuperClassWithAnIdProperty.class;
+
+		// THEN
+		this.expectedEx.expect(APIConfigurationException.class);
+
+		// WHEN
+		new APIHolder<>(clazz, false);
 	}
 
 	@Test

@@ -27,6 +27,15 @@ public class AnnotationUtil {
 
 	public static boolean hasAnnotation(Field field, Class<?> annotationClazz) {
 		Annotation[] annotations = field.getDeclaredAnnotations();
+		return hasAnnotation(annotations, annotationClazz);
+	}
+
+	public static boolean hasAnnotation(Class<?> clazz, Class<?> annotationClazz) {
+		Annotation[] annotations = clazz.getDeclaredAnnotations();
+		return hasAnnotation(annotations, annotationClazz);
+	}
+
+	private static boolean hasAnnotation(Annotation[] annotations, Class<?> annotationClazz) {
 		for (Annotation annotation : annotations)
 			if (annotationClazz.equals(annotation.annotationType()))
 				return true;

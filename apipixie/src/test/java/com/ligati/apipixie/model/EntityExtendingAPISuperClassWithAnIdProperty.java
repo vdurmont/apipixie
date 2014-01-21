@@ -3,7 +3,7 @@ package com.ligati.apipixie.model;
 import com.ligati.apipixie.annotation.APIEntity;
 
 @APIEntity
-public class EntityExtendingAClassWithAnIdProperty extends EntityWithIdButNoAnnotation {
+public class EntityExtendingAPISuperClassWithAnIdProperty extends APISuperClassWithId {
 	private String text;
 
 	public String getText() {
