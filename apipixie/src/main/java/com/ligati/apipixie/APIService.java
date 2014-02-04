@@ -162,16 +162,65 @@ public class APIService<T, K> {
 		return this.holder.set(entity, propertyName, nestedEntity);
 	}
 
-	private JSONObject entityToJsonObject(T entity) {
+	protected JSONObject entityToJsonObject(T entity) {
 		JSONObject json = new JSONObject();
-		for (String property : this.holder.getPropertiesNames())
+		for (String propertyName : this.holder.getPropertiesNames())
 			try {
-				json.put(property, this.holder.get(entity, property));
+				ComplexField complexField = this.holder.getComplexField(propertyName);
+				if (complexField != null)
+					json.put(propertyName, this.processComplexFieldEntityToJson(complexField, entity, propertyName));
+				else
+					json.put(propertyName, this.holder.get(entity, propertyName));
 			} catch (JSONException e) {
 				if (logger.isDebugEnabled())
 					e.printStackTrace();
-				throw new APIParsingException("An error occurred while reading the entity field: " + property, e);
+				throw new APIParsingException("An error occurred while reading the entity field: " + propertyName, e);
 			}
 		return json;
+	}
+
+	private Object processComplexFieldEntityToJson(ComplexField complexField, T entity, String propertyName) throws JSONException {
+		switch (complexField.getType()) {
+			case BASIC_COLLECTION:
+				return this.processBasicCollectionEntityToJson(complexField, entity, propertyName);
+			case ENTITY_COLLECTION:
+				return this.processEntityCollectionEntityToJson(complexField, entity, propertyName);
+			case NESTED_ENTITY:
+				return this.processNestedEntityToJson(complexField, entity, propertyName);
+		}
+		throw new NotImplementedException();
+	}
+
+	private JSONArray processBasicCollectionEntityToJson(ComplexField complexField, T entity, String propertyName) {
+		JSONArray array = new JSONArray();
+		Object nestedObjects = this.holder.get(entity, propertyName);
+		if (nestedObjects == null)
+			return null;
+		for (Object nestedObject : complexField.getCollectionClass().cast(nestedObjects))
+			array.put(nestedObject);
+		return array;
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONArray processEntityCollectionEntityToJson(ComplexField complexField, T entity, String propertyName) {
+		JSONArray array = new JSONArray();
+		Object nestedEntities = this.holder.get(entity, propertyName);
+		if (nestedEntities == null)
+			return null;
+		APIService service = new APIService(pixie, complexField.getClazz(), http);
+		for (Object nestedEntity : complexField.getCollectionClass().cast(nestedEntities)) {
+			JSONObject nestedJson = service.entityToJsonObject(nestedEntity);
+			array.put(nestedJson);
+		}
+		return array;
+	}
+
+	@SuppressWarnings("unchecked")
+	private JSONObject processNestedEntityToJson(ComplexField complexField, T entity, String propertyName) throws JSONException {
+		Object nestedEntity = this.holder.get(entity, propertyName);
+		if (nestedEntity == null)
+			return null;
+		APIService service = new APIService(pixie, complexField.getClazz(), http);
+		return service.entityToJsonObject(nestedEntity);
 	}
 }

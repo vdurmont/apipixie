@@ -49,4 +49,14 @@ public class ComplexField {
 	public enum FieldType {
 		BASIC_COLLECTION, ENTITY_COLLECTION, DATE, NESTED_ENTITY, ENUM
 	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("ComplexField{");
+		sb.append("type=").append(type);
+		sb.append(", clazz=").append(clazz);
+		sb.append(", collectionClass=").append(collectionClass);
+		sb.append('}');
+		return sb.toString();
+	}
 }

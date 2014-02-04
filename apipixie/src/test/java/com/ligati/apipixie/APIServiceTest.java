@@ -14,6 +14,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -289,5 +291,87 @@ public class APIServiceTest {
 		// THEN
 		assertEquals(new Long(42), entity.getId());
 		assertEquals(new Long(43), entity.getEntity().getId());
+	}
+
+	@Test
+	public void entityToJsonObject_with_an_array_and_a_basic_collection_maps_the_array() throws JSONException {
+		// GIVEN
+		APIService<EntityWithBasicCollectionAPICollection, Long> service = new APIService<>(pixie, EntityWithBasicCollectionAPICollection.class, http);
+
+		EntityWithBasicCollectionAPICollection entity = new EntityWithBasicCollectionAPICollection();
+		entity.setId(42L);
+		ArrayList<String> strings = new ArrayList<>();
+		strings.add("first");
+		strings.add("second");
+		entity.setStrings(strings);
+
+		// WHEN
+		JSONObject json = service.entityToJsonObject(entity);
+
+		// THEN
+		assertEquals(42L, json.getLong("id"));
+		assertEquals(2, json.getJSONArray("strings").length());
+		assertEquals("first", json.getJSONArray("strings").getString(0));
+		assertEquals("second", json.getJSONArray("strings").getString(1));
+	}
+
+	@Test
+	public void entityToJsonObject_with_a_nested_APIEntity_maps_the_entity() throws JSONException {
+		// GIVEN
+		APIService<EntityWithNestedEntity, Long> service = new APIService<>(pixie, EntityWithNestedEntity.class, http);
+
+		Entity nested = new Entity();
+		nested.setId(31L);
+		nested.setText("my custom text");
+
+		EntityWithNestedEntity entity = new EntityWithNestedEntity();
+		entity.setId(42L);
+		entity.setEntity(nested);
+
+
+		// WHEN
+		JSONObject json = service.entityToJsonObject(entity);
+
+		// THEN
+		assertEquals(42L, json.getLong("id"));
+		assertEquals(31L, json.getJSONObject("entity").getLong("id"));
+		assertEquals("my custom text", json.getJSONObject("entity").getString("text"));
+	}
+
+	@Test
+	public void entityToJsonObject_with_an_array_and_an_APIEntity_collection_maps_the_array() throws JSONException {
+		// GIVEN
+		APIService<EntityWithEntityCollectionAPICollection, Long> service = new APIService<>(pixie, EntityWithEntityCollectionAPICollection.class, http);
+
+		List<Entity> nested = new LinkedList<>();
+
+		Entity nested1 = new Entity();
+		nested1.setId(11L);
+		nested1.setText("first nested entity");
+		nested.add(nested1);
+
+		Entity nested2 = new Entity();
+		nested2.setId(22L);
+		nested2.setText("second nested entity");
+		nested.add(nested2);
+
+		EntityWithEntityCollectionAPICollection entity = new EntityWithEntityCollectionAPICollection();
+		entity.setId(33L);
+		entity.setEntities(nested);
+
+		// WHEN
+		JSONObject json = service.entityToJsonObject(entity);
+
+		// THEN
+		assertEquals(33L, json.getLong("id"));
+		assertEquals(2, json.getJSONArray("entities").length());
+
+		JSONObject obj1 = json.getJSONArray("entities").getJSONObject(0);
+		assertEquals(11L, obj1.getLong("id"));
+		assertEquals("first nested entity", obj1.getString("text"));
+
+		JSONObject obj2 = json.getJSONArray("entities").getJSONObject(1);
+		assertEquals(22L, obj2.getLong("id"));
+		assertEquals("second nested entity", obj2.getString("text"));
 	}
 }
