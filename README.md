@@ -1,5 +1,7 @@
 API PIXIE
 ==================
+[![Build Status](https://travis-ci.org/vdurmont/apipixie.svg?branch=master)](https://travis-ci.org/vdurmont/eapipixie)
+[![License Info](http://img.shields.io/badge/license-The%20MIT%20License-brightgreen.svg)](https://github.com/vdurmont/emoji-java/blob/master/LICENSE.md)
 
 API PIXIE is a Java library which enables you to set up a communication with a distant REST API in minutes.
 
